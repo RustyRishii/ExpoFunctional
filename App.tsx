@@ -1,12 +1,17 @@
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState, useCallback } from "react";
+import { PropsWithChildren } from "react";
+import { useRef } from "react";
 import {
+  ViewStyle,
   StyleSheet,
   ScrollView,
+  Animated,
   Text,
   View,
   RefreshControl,
   TouchableOpacity,
+  Pressable,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import universalStyles from "./src/styles/styles";
@@ -14,7 +19,39 @@ import Icon from "react-native-vector-icons/Ionicons";
 import Clipboard from "@react-native-clipboard/clipboard";
 import Snackbar from "react-native-snackbar";
 
-const copyIcon = <Icon name="copy" size={20} color="white" />;
+const copyIcon = (
+  <Icon
+    name="copy"
+    size={20}
+    color="white"
+    style={{ backgroundColor: "green", padding: 5, borderRadius: 10 }}
+  />
+);
+
+type FadeInViewProps = PropsWithChildren<{ style: ViewStyle }>;
+
+const FadeInView: React.FC<FadeInViewProps> = (props) => {
+  const fadeAnim = useRef(new Animated.Value(0)).current; // Initial value for opacity: 0
+
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 10000,
+      useNativeDriver: true,
+    }).start();
+  }, [fadeAnim]);
+
+  return (
+    <Animated.View // Special animatable View
+      style={{
+        ...props.style,
+        opacity: fadeAnim, // Bind opacity to animated value
+      }}
+    >
+      {props.children}
+    </Animated.View>
+  );
+};
 
 export default function App() {
   const [refreshing, setRefreshing] = useState(false);
@@ -244,13 +281,29 @@ export default function App() {
           ) : null}
         </View>
         <View style={universalStyles.iconBar}>
-          <TouchableOpacity onPress={copyToClipboard}>
+          <TouchableOpacity
+            onPress={() => {
+              snackbarFunction();
+              copyToClipboard();
+            }}
+          >
             {copyIcon}
           </TouchableOpacity>
           <TouchableOpacity onPress={copyToClipboard}>
             {copyIcon}
           </TouchableOpacity>
         </View>
+        <FadeInView
+          style={{
+            width: 250,
+            height: 50,
+            backgroundColor: "powderblue",
+          }}
+        >
+          <Text style={{ fontSize: 28, textAlign: "center", margin: 10 }}>
+            Fading in
+          </Text>
+        </FadeInView>
       </ScrollView>
     </SafeAreaView>
   );
