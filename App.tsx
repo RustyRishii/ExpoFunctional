@@ -1,17 +1,18 @@
 import { StatusBar } from "expo-status-bar";
-import { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, Children } from "react";
 import { PropsWithChildren } from "react";
 import { useRef } from "react";
 import {
   ViewStyle,
   StyleSheet,
   ScrollView,
-  Animated,
   Text,
   View,
   RefreshControl,
   TouchableOpacity,
   Pressable,
+  Animated,
+  Easing,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import universalStyles from "./src/styles/styles";
@@ -28,27 +29,52 @@ const copyIcon = (
   />
 );
 
+type FadeOutProps = PropsWithChildren<{ style: ViewStyle }>;
+
 type FadeInViewProps = PropsWithChildren<{ style: ViewStyle }>;
 
 const FadeInView: React.FC<FadeInViewProps> = (props) => {
-  const fadeAnim = useRef(new Animated.Value(0)).current; // Initial value for opacity: 0
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
       toValue: 1,
-      duration: 10000,
       useNativeDriver: true,
+      duration: 10000,
     }).start();
   }, [fadeAnim]);
 
   return (
-    <Animated.View // Special animatable View
+    <Animated.View
       style={{
         ...props.style,
-        opacity: fadeAnim, // Bind opacity to animated value
+        opacity: fadeAnim,
       }}
     >
       {props.children}
+    </Animated.View>
+  );
+};
+
+const FadeOutView: React.FC<FadeOutProps> = (props) => {
+  const fadeoutAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.timing(fadeoutAnim, {
+      toValue: 0,
+      useNativeDriver: true,
+      duration: 10000,
+    }).start();
+  }, [fadeoutAnim]);
+
+  return (
+    <Animated.View
+      style={{
+        ...props.style,
+        opacity: fadeoutAnim,
+      }}
+    >
+      <Text>{props.children}</Text>
     </Animated.View>
   );
 };
@@ -68,6 +94,7 @@ export default function App() {
   };
 
   useEffect(() => {
+    randomColorFunction();
     getAPIData();
   }, []);
 
@@ -295,15 +322,26 @@ export default function App() {
         </View>
         <FadeInView
           style={{
-            width: 250,
+            width: "100%",
+            alignItems: "center",
+            justifyContent: "center",
             height: 50,
-            backgroundColor: "powderblue",
+            backgroundColor: "red",
           }}
         >
-          <Text style={{ fontSize: 28, textAlign: "center", margin: 10 }}>
-            Fading in
-          </Text>
+          <Text style={{ color: "green", fontSize: 20 }}>This is text</Text>
         </FadeInView>
+        <FadeOutView
+          style={{
+            width: "100%",
+            height: 50,
+            backgroundColor: "green",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Text style={{ color: "black", fontSize: 20 }}>Xd</Text>
+        </FadeOutView>
       </ScrollView>
     </SafeAreaView>
   );
